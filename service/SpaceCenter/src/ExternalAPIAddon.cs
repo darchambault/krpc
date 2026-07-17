@@ -16,6 +16,7 @@ namespace KRPC.SpaceCenter
         {
             ExternalAPI.AGX.Load ();
             ExternalAPI.FAR.Load ();
+            ExternalAPI.KSPAeroSim.Load ();
             ExternalAPI.RemoteTech.Load ();
         }
     }

@@ -236,7 +236,7 @@ namespace KRPC.SpaceCenter.Services
                     var rb = part.rb;
                     if (rb != null && rb.angularDrag > 0f)
                         torque -= (Vector3d)(rb.angularDrag *
-                            StockAerodynamics.PartAngularMomentum (rb, rb.angularVelocity));
+                            RigidbodyExtensions.PartAngularMomentum (rb, rb.angularVelocity));
                 }
                 return torque * 1000d;
             }
@@ -679,6 +679,31 @@ namespace KRPC.SpaceCenter.Services
         }
 
         /// <summary>
+        /// Simulate the aerodynamic wrench through the KSPAeroSim mod by capturing a
+        /// fresh model of the current vessel and evaluating it once at the given
+        /// hypothetical state. All state arguments are in reference frame
+        /// <see cref="ReferenceFrame"/> except the angular velocity, which the caller
+        /// supplies in world space.
+        /// </summary>
+        ExternalAPI.KSPAeroSim.Wrench SimulateWrench (
+            CelestialBody body, Tuple3 position, Tuple3 velocity, Tuple4 rotation,
+            Vector3d worldAngularVelocity, double ut)
+        {
+            if (ReferenceEquals (body, null))
+                throw new ArgumentNullException (nameof (body));
+            ExternalAPI.KSPAeroSim.CheckAvailable ();
+            var vessel = InternalVessel;
+            var worldPosition = referenceFrame.PositionToWorldSpace (position.ToVector ());
+            var worldVelocity = referenceFrame.VelocityToWorldSpace (position.ToVector (), velocity.ToVector ());
+            var worldRotation = referenceFrame.RotationToWorldSpace (rotation.ToQuaternion ());
+            var model = ExternalAPI.KSPAeroSim.CreateModel (
+                vessel, vessel.currentStage, null, null);
+            return ExternalAPI.KSPAeroSim.Evaluate (
+                model, body.InternalBody, worldPosition, worldVelocity, worldRotation,
+                worldAngularVelocity, ut);
+        }
+
+        /// <summary>
         /// Simulate and return the total aerodynamic forces acting on the vessel,
         /// if it were traveling with the given velocity, at the given position and
         /// orientation, in the atmosphere of the given celestial body.
@@ -697,6 +722,12 @@ namespace KRPC.SpaceCenter.Services
         /// magnitude equal to the strength of the force in Newtons, in reference frame
         /// <see cref="ReferenceFrame"/>.</returns>
         /// <remarks>
+        /// Requires the KSPAeroSim mod, and throws an exception when it is not
+        /// installed. Each call captures a
+        /// fresh aerodynamic model of the current vessel (with no further staging
+        /// applied) and evaluates it once; scripts that evaluate many states should use
+        /// the AeroSim service and hold a model instead.
+        ///
         /// The position, velocity and rotation arguments, and the returned force, are all
         /// expressed in reference frame <see cref="ReferenceFrame"/>. The result is the
         /// force the vessel would experience if it were placed at that position and
@@ -705,32 +736,13 @@ namespace KRPC.SpaceCenter.Services
         /// Atmospheric temperature and density are evaluated at the current universal time.
         /// </remarks>
         [KRPCMethod]
+        [Obsolete ("Use the AeroSim service's Model.Evaluate instead.")]
         public Tuple3 SimulateAerodynamicForceAt(CelestialBody body, Tuple3 position, Tuple3 velocity, Tuple4 rotation)
         {
-            if (ReferenceEquals (body, null))
-                throw new ArgumentNullException (nameof (body));
-            var vessel = InternalVessel;
-            var worldVelocity = referenceFrame.VelocityToWorldSpace(position.ToVector(), velocity.ToVector());
-            var worldPosition = referenceFrame.PositionToWorldSpace(position.ToVector());
-            QuaternionD desiredWorld = referenceFrame.RotationToWorldSpace (rotation.ToQuaternion ());
-            QuaternionD currentWorld = vessel.ReferenceTransform.rotation;
-            var delta = desiredWorld * currentWorld.Inverse ();
-            Vector3 force;
-            if (!FAR.IsAvailable) {
-                force = StockAerodynamics.SimAeroForce(
-                    body.InternalBody, vessel, worldVelocity, worldPosition, delta);
-            } else {
-                Vector3 torque;
-                var altitude = (worldPosition - body.InternalBody.position).magnitude - body.InternalBody.Radius;
-                var adjustedVelocity = delta.Inverse ()
-                    * (worldVelocity - body.InternalBody.getRFrmVel(worldPosition));
-                FAR.CalculateVesselAeroForces(vessel, out force, out torque, adjustedVelocity, altitude);
-                // CalculateVesselAeroForces returns kilonewtons; convert to newtons to
-                // match the stock path and this method's documented units.
-                force = force * 1000f;
-                force = (Vector3)(delta * (Vector3d)force);
-            }
-            return referenceFrame.DirectionFromWorldSpace(force).ToTuple();
+            var wrench = SimulateWrench (
+                body, position, velocity, rotation, Vector3d.zero,
+                Planetarium.GetUniversalTime ());
+            return referenceFrame.DirectionFromWorldSpace(wrench.Force).ToTuple();
         }
 
         /// <summary>
@@ -759,6 +771,12 @@ namespace KRPC.SpaceCenter.Services
         /// aerodynamic torque in newton-meters about the vessel's center of mass. Both are
         /// vectors in reference frame <see cref="ReferenceFrame"/>.</returns>
         /// <remarks>
+        /// Requires the KSPAeroSim mod, and throws an exception when it is not
+        /// installed. Each call captures a fresh aerodynamic model of the current
+        /// vessel (with no further staging applied) and evaluates it once; scripts
+        /// that evaluate many states should use the AeroSim service and hold a
+        /// model instead.
+        ///
         /// The position and velocity describe the hypothetical center-of-mass state. The
         /// position, velocity, rotation and angular velocity arguments, and both returned
         /// vectors, are expressed in reference frame <see cref="ReferenceFrame"/>.
@@ -766,47 +784,18 @@ namespace KRPC.SpaceCenter.Services
         /// is recommended so that the spatial state has unambiguous inertial semantics.
         ///
         /// This is an instantaneous rigid-body result based on the vessel's current parts,
-        /// drag cubes and control-surface state. When
-        /// <a href="https://forum.kerbalspaceprogram.com/index.php?/topic/19321-130-ferram-aerospace-research-v0159-liebe-82117/">Ferram Aerospace Research</a>
-        /// is installed the angular velocity and <paramref name="ut"/> arguments are ignored.
+        /// drag cubes and control-surface state.
         /// </remarks>
         [KRPCMethod]
+        [Obsolete ("Use the AeroSim service's Model.Evaluate instead.")]
         public TupleT3 SimulateAerodynamicWrenchAt(CelestialBody body, Tuple3 position, Tuple3 velocity, Tuple4 rotation, Tuple3 angularVelocity, double ut)
         {
-            if (ReferenceEquals (body, null))
-                throw new ArgumentNullException (nameof (body));
-            var vessel = InternalVessel;
-            var worldVelocity = referenceFrame.VelocityToWorldSpace(position.ToVector(), velocity.ToVector());
-            var worldPosition = referenceFrame.PositionToWorldSpace(position.ToVector());
-            var worldAngularVelocity = referenceFrame.AngularVelocityToWorldSpace(angularVelocity.ToVector());
-            QuaternionD desiredWorld = referenceFrame.RotationToWorldSpace (rotation.ToQuaternion ());
-            QuaternionD currentWorld = vessel.ReferenceTransform.rotation;
-            var delta = desiredWorld * currentWorld.Inverse ();
-            Vector3d force;
-            Vector3d torque;
-            if (!FAR.IsAvailable) {
-                var wrench = StockAerodynamics.SimAeroWrench(
-                    body.InternalBody, vessel, worldVelocity, worldAngularVelocity,
-                    worldPosition, delta, ut, true, false);
-                force = wrench.Force;
-                torque = wrench.Torque;
-            } else {
-                Vector3 farForce;
-                Vector3 farTorque;
-                var adjustedVelocity = delta.Inverse ()
-                    * (worldVelocity - body.InternalBody.getRFrmVel(worldPosition));
-                var altitude = (worldPosition - body.InternalBody.position).magnitude
-                               - body.InternalBody.Radius;
-                FAR.CalculateVesselAeroForces(
-                    vessel, out farForce, out farTorque, adjustedVelocity, altitude);
-                // FAR returns kilonewtons and kilonewton-meters. Rotate the one
-                // evaluation into the hypothetical attitude and convert both to SI.
-                force = delta * (Vector3d)farForce * 1000d;
-                torque = delta * (Vector3d)farTorque * 1000d;
-            }
+            var wrench = SimulateWrench (
+                body, position, velocity, rotation,
+                referenceFrame.AngularVelocityToWorldSpace (angularVelocity.ToVector ()), ut);
             return new TupleT3(
-                referenceFrame.DirectionFromWorldSpace(force).ToTuple(),
-                referenceFrame.DirectionFromWorldSpace(torque).ToTuple());
+                referenceFrame.DirectionFromWorldSpace(wrench.Force).ToTuple(),
+                referenceFrame.DirectionFromWorldSpace(wrench.Torque).ToTuple());
         }
 
         /// <summary>
@@ -833,10 +822,14 @@ namespace KRPC.SpaceCenter.Services
         /// to the strength of the torque in newton-meters, in reference frame
         /// <see cref="ReferenceFrame"/>.</returns>
         /// <remarks>
+        /// Requires the KSPAeroSim mod, and throws an exception when it is not
+        /// installed. Each call captures a fresh aerodynamic model of the current
+        /// vessel (with no further staging applied) and evaluates it once; scripts
+        /// that evaluate many states should use the AeroSim service and hold a
+        /// model instead.
+        ///
         /// The position, velocity, rotation and angular velocity arguments, and the returned
-        /// torque, are all expressed in reference frame <see cref="ReferenceFrame"/>. When
-        /// <a href="https://forum.kerbalspaceprogram.com/index.php?/topic/19321-130-ferram-aerospace-research-v0159-liebe-82117/">Ferram Aerospace Research</a>
-        /// is installed the angular velocity argument is ignored.
+        /// torque, are all expressed in reference frame <see cref="ReferenceFrame"/>.
         /// Atmospheric temperature and density are evaluated at the current universal time.
         ///
         /// This is the ideal rigid-body aerodynamic torque, summed from the per-part forces
@@ -846,11 +839,14 @@ namespace KRPC.SpaceCenter.Services
         /// rather than to the vessel as a rigid body.
         /// </remarks>
         [KRPCMethod]
+        [Obsolete ("Use the AeroSim service's Model.Evaluate instead.")]
         public Tuple3 SimulateAerodynamicTorqueAt(CelestialBody body, Tuple3 position, Tuple3 velocity, Tuple4 rotation, Tuple3 angularVelocity)
         {
-            return SimulateAerodynamicWrenchAt(
-                body, position, velocity, rotation, angularVelocity,
-                Planetarium.GetUniversalTime()).Item2;
+            var wrench = SimulateWrench (
+                body, position, velocity, rotation,
+                referenceFrame.AngularVelocityToWorldSpace (angularVelocity.ToVector ()),
+                Planetarium.GetUniversalTime ());
+            return referenceFrame.DirectionFromWorldSpace(wrench.Torque).ToTuple();
         }
 
         /// <summary>

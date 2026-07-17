@@ -14,6 +14,30 @@ from krpctest.geometry import (
 )
 
 
+def simulate_aero_available(vessel):
+    """Whether the Flight.simulate_aerodynamic_* endpoints can run.
+
+    They delegate to the KSPAeroSim mod, so they are unavailable when the mod
+    is not installed or when no compatible aerodynamic provider is registered
+    (e.g. under FAR without a FAR-compatible provider).
+    """
+    body = vessel.orbit.body
+    ref = body.reference_frame
+    try:
+        vessel.flight(ref).simulate_aerodynamic_force_at(
+            body, vessel.position(ref), (0.0, 0.0, 0.0), vessel.rotation(ref)
+        )
+    except RuntimeError as error:
+        message = str(error)
+        if (
+            "KSPAeroSim is not installed" in message
+            or "aerodynamic provider" in message
+        ):
+            return False
+        raise
+    return True
+
+
 class TestFlight(krpctest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -335,8 +359,9 @@ class TestFlightAtLaunchpad(krpctest.TestCase):
         # The rotation argument sets the vessel attitude the force is computed
         # for (issue #913). A 300 m/s head-on wind (angle of attack 0 at the
         # current attitude) gives a real force; pitching 90 degrees turns it into
-        # a broadside wind and changes the force. Works for stock and FAR (both
-        # return the force in newtons).
+        # a broadside wind and changes the force.
+        if not simulate_aero_available(self.vessel):
+            self.skipTest("KSPAeroSim not available")
         body = self.vessel.orbit.body
         ref = body.reference_frame
         flight = self.vessel.flight(ref)
@@ -380,11 +405,11 @@ class TestFlightAtLaunchpad(krpctest.TestCase):
 
 
 class TestFlightAero(krpctest.TestCase):
-    # Stock aerodynamic torque simulation (issue #914) for a craft with control
+    # Aerodynamic wrench simulation (issue #914) for a craft with control
     # surfaces off the center of mass. The tests are self-consistent: they compare
     # simulated values against each other under a synthetic 300 m/s wind, so they
-    # need no live airflow and run on the launchpad. Works for stock and FAR,
-    # except where noted.
+    # need no live airflow and run on the launchpad. The simulate endpoints
+    # delegate to the KSPAeroSim mod, so most tests skip when it is unavailable.
 
     @classmethod
     def setUpClass(cls):
@@ -393,7 +418,11 @@ class TestFlightAero(krpctest.TestCase):
         cls.remove_other_vessels()
         cls.space_center = cls.connect().space_center
         cls.vessel = cls.space_center.active_vessel
-        cls.far = cls.space_center.far_available
+        cls.aero_sim = simulate_aero_available(cls.vessel)
+
+    def require_aero_sim(self):
+        if not self.aero_sim:
+            self.skipTest("KSPAeroSim not available")
 
     def head_on_wind(self, ref):
         # 300 m/s wind along the nose (angle of attack 0 at the current attitude)
@@ -421,6 +450,7 @@ class TestFlightAero(krpctest.TestCase):
         # launchpad suspension between calls, and the legacy endpoints evaluate
         # the atmosphere at their own call-time UT. Torque is more sensitive to
         # that drift than force (lever arms), so it gets its own tolerance.
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         ref = body.reference_frame
         flight = self.vessel.flight(ref)
@@ -477,8 +507,7 @@ class TestFlightAero(krpctest.TestCase):
         )
 
     def test_simulate_aerodynamic_wrench_ut_changes_solar_exposure(self):
-        if self.far:
-            self.skipTest("FAR intentionally ignores the wrench UT")
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         ref = body.non_rotating_reference_frame
         flight = self.vessel.flight(ref)
@@ -499,7 +528,8 @@ class TestFlightAero(krpctest.TestCase):
     def test_simulate_aerodynamic_torque_attitude(self):
         # A head-on wind (angle of attack 0) produces little torque; pitching 90
         # degrees to a broadside wind produces a large torque about the center of
-        # mass (issue #914). Works for stock and FAR.
+        # mass (issue #914).
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         ref = body.reference_frame
         flight = self.vessel.flight(ref)
@@ -526,10 +556,8 @@ class TestFlightAero(krpctest.TestCase):
 
     def test_simulate_aerodynamic_torque_angular_velocity(self):
         # Angular velocity adds the solid-body rotation term omega x r to each
-        # part's airflow, producing a damping torque. Stock model only; the FAR
-        # path ignores angular velocity.
-        if self.far:
-            self.skipTest("angular velocity is ignored under FAR")
+        # part's airflow, producing a damping torque.
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         ref = body.reference_frame
         flight = self.vessel.flight(ref)
@@ -554,9 +582,8 @@ class TestFlightAero(krpctest.TestCase):
     def test_simulate_aerodynamic_wrench_angular_velocity(self):
         # pylint: disable=too-many-locals
         # Central differences expose both the rate-aware force response and the
-        # aerodynamic damping torque. FAR intentionally ignores angular velocity.
-        if self.far:
-            self.skipTest("angular velocity is ignored under FAR")
+        # aerodynamic damping torque.
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         ref = body.reference_frame
         flight = self.vessel.flight(ref)
@@ -592,6 +619,7 @@ class TestFlightAero(krpctest.TestCase):
         # vessel frames. Transform every result to the non-rotating frame before
         # comparison. CelestialBody.angular_velocity supplies one stable physical
         # body rate while accounting for each reference frame's rotation rate.
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         common = body.non_rotating_reference_frame
         rotating = body.reference_frame
@@ -642,6 +670,7 @@ class TestFlightAero(krpctest.TestCase):
             self.assert_vectors_close(expected_torque, torque)
 
     def test_simulate_aerodynamic_wrench_edge_cases(self):
+        self.require_aero_sim()
         body = self.vessel.orbit.body
         ref = body.reference_frame
         flight = self.vessel.flight(ref)
@@ -697,7 +726,7 @@ class TestFlightAirbrake(krpctest.TestCase):
         cls.remove_other_vessels()
         cls.space_center = cls.connect().space_center
         cls.vessel = cls.space_center.active_vessel
-        cls.far = cls.space_center.far_available
+        cls.aero_sim = simulate_aero_available(cls.vessel)
 
     def _airbrakes(self):
         return [
@@ -729,8 +758,8 @@ class TestFlightAirbrake(krpctest.TestCase):
         return legacy_force
 
     def test_simulate_aerodynamic_force_and_wrench_airbrake_deploy(self):
-        if self.far:
-            self.skipTest("Stock airbrake deflection path; skip when FAR is installed")
+        if not self.aero_sim:
+            self.skipTest("KSPAeroSim not available")
 
         airbrakes = self._airbrakes()
         self.assertGreaterEqual(len(airbrakes), 1)

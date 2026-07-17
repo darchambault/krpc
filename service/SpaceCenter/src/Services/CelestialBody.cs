@@ -351,7 +351,7 @@ namespace KRPC.SpaceCenter.Services
         {
             if (ReferenceEquals(referenceFrame, null))
                 throw new ArgumentNullException(nameof(referenceFrame));
-            return StockAerodynamics.GetAtmosphericState(
+            return StockAtmosphere.GetAtmosphericState(
                 referenceFrame.PositionToWorldSpace(position.ToVector()),
                 InternalBody, Planetarium.GetUniversalTime()).Density;
         }
@@ -376,7 +376,7 @@ namespace KRPC.SpaceCenter.Services
         {
             if (ReferenceEquals (referenceFrame, null))
                 throw new ArgumentNullException (nameof (referenceFrame));
-            return StockAerodynamics.GetTemperature(referenceFrame.PositionToWorldSpace(position.ToVector()), InternalBody);
+            return StockAtmosphere.GetTemperature(referenceFrame.PositionToWorldSpace(position.ToVector()), InternalBody);
         }
 
         /// <summary>
@@ -393,7 +393,7 @@ namespace KRPC.SpaceCenter.Services
         [KRPCMethod]
         public double DensityAt (double altitude)
         {
-            return StockAerodynamics.GetDensity (altitude, InternalBody);
+            return StockAtmosphere.GetDensity (altitude, InternalBody);
         }
 
         /// <summary>
@@ -403,7 +403,7 @@ namespace KRPC.SpaceCenter.Services
         [KRPCMethod]
         public double PressureAt (double altitude)
         {
-            return StockAerodynamics.GetPressure (altitude, InternalBody);
+            return StockAtmosphere.GetPressure (altitude, InternalBody);
         }
 
         /// <summary>

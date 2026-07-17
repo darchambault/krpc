@@ -1,4 +1,12 @@
 v0.6.0
+ * Deprecate Flight.SimulateAerodynamicForceAt, SimulateAerodynamicWrenchAt and
+   SimulateAerodynamicTorqueAt in favor of the new AeroSim service's Model.Evaluate
+ * Flight.SimulateAerodynamicForceAt, SimulateAerodynamicWrenchAt and
+   SimulateAerodynamicTorqueAt now delegate to the KSPAeroSim mod and throw an
+   exception when it is not installed; the built-in stock aerodynamic simulator
+   has been removed. Under Ferram Aerospace Research these endpoints now also
+   throw until a FAR-compatible KSPAeroSim provider is available (previously
+   they evaluated FAR directly)
  * Fix Flight.SimulateAerodynamicForceAt ignoring the current deflection of
    aerodynamic control surfaces, including deployed airbrakes (#622)
  * Fix Maneuver and ManeuverOrbital reference frame velocity (previously returned zero; now returns the orbital velocity at the node UT)
