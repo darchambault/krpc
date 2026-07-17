@@ -1,0 +1,11 @@
+.. default-domain:: {{ domain.sphinxname }}
+.. highlight:: {{ domain.highlight }}
+{{ domain.currentmodule('AeroSim') }}
+{% import domain.macros as macros with context %}
+
+TrimResult
+==========
+
+{{ macros.class(services['AeroSim'].classes['TrimResult']) }}
+
+{{ macros.enumeration(services['AeroSim'].enumerations['TrimStability']) }}

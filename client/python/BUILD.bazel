@@ -11,6 +11,7 @@ exports_files(["CHANGES.txt"])
 py_library(
     name = "krpc_lib",
     srcs = [
+        ":services-aerosim",
         ":services-dockingcamera",
         ":services-drawing",
         ":services-infernalrobotics",
@@ -101,6 +102,7 @@ py_sdist(
         "CHANGES.txt",
         "LICENSE",
         "pyproject.toml",
+        ":services-aerosim",
         ":services-dockingcamera",
         ":services-drawing",
         ":services-infernalrobotics",
@@ -193,6 +195,13 @@ clientgen_python(
     out = "krpc/services/dockingcamera.py",
     defs = "//service/DockingCamera:ServiceDefinitions",
     service = "DockingCamera",
+)
+
+clientgen_python(
+    name = "services-aerosim",
+    out = "krpc/services/aerosim.py",
+    defs = "//service/AeroSim:ServiceDefinitions",
+    service = "AeroSim",
 )
 
 test_suite(

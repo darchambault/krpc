@@ -115,6 +115,7 @@ pkg_zip(
         "@csharp_krpc_io_ports_license//file",
         # Services
         "//service/SpaceCenter",
+        "//service/AeroSim",
         "//service/Drawing",
         "//service/InfernalRobotics",
         "//service/KerbalAlarmClock",
@@ -166,6 +167,9 @@ pkg_zip(
         "service/DockingCamera/KRPC.DockingCamera/net472/": "GameData/kRPC/",
         "service/DockingCamera/": "GameData/kRPC/",
         "service/DockingCamera/CHANGES.txt": "GameData/kRPC/CHANGES.DockingCamera.txt",
+        "service/AeroSim/KRPC.AeroSim/net472/": "GameData/kRPC/",
+        "service/AeroSim/": "GameData/kRPC/",
+        "service/AeroSim/CHANGES.txt": "GameData/kRPC/CHANGES.AeroSim.txt",
         # Module Manager
         "../+http_file+module_manager/file/ModuleManager.4.2.3.dll": "GameData/ModuleManager.4.2.3.dll",
         # Schema
@@ -186,6 +190,7 @@ test_suite(
         "//client/websockets:test",
         "//core:test",
         "//doc:test",
+        "//service/AeroSim:test",
         "//service/Drawing:test",
         "//service/InfernalRobotics:test",
         "//service/RemoteTech:test",
@@ -205,6 +210,7 @@ test_suite(
         "//client/python:lint",
         "//client/websockets:lint",
         "//doc:lint",
+        "//service/AeroSim:lint",
         "//service/Drawing:lint",
         "//service/InfernalRobotics:lint",
         "//service/RemoteTech:lint",
@@ -224,6 +230,7 @@ filegroup(
         "//core",
         "//core:test-KRPC.Core",
         "//server",
+        "//service/AeroSim",
         "//service/DockingCamera",
         "//service/Drawing",
         "//service/InfernalRobotics",

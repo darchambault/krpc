@@ -1,0 +1,79 @@
+load("@rules_dotnet//dotnet:defs.bzl", "csharp_library")
+load("//:config.bzl", "assembly_version", "author")
+load("//service:build.bzl", "service_deps")
+load("//tools/build:assembly_info.bzl", "csharp_assembly_info")
+load("//tools/build:python.bzl", "py_lint_test")
+load("//tools/ServiceDefinitions:build.bzl", "service_definitions")
+
+exports_files(["CHANGES.txt"])
+
+filegroup(
+    name = "AeroSim",
+    srcs = [
+        "CHANGES.txt",
+        ":KRPC.AeroSim",
+        ":ServiceDefinitions",
+    ],
+    visibility = ["//:__pkg__"],
+)
+
+csharp_assembly_info(
+    name = "AssemblyInfo",
+    cls_compliant = False,
+    copyright = author,
+    description = "KSPAeroSim API for kRPC",
+    title = "KRPC.AeroSim",
+    version = assembly_version,
+    visibility = [
+        "//:__pkg__",  # Make visible to //:csproj-deps so it can copy AssemblyInfo.cs to generated_deps
+    ],
+)
+
+srcs = [":AssemblyInfo"] + glob(["src/**/*.cs"])
+
+deps = service_deps + ["//service/SpaceCenter:KRPC.SpaceCenter"]
+
+csharp_library(
+    name = "KRPC.AeroSim",
+    srcs = srcs,
+    target_frameworks = ["net472"],
+    treat_warnings_as_errors = True,
+    visibility = ["//visibility:public"],
+    warning_level = 4,
+    deps = deps,
+)
+
+service_definitions(
+    name = "ServiceDefinitions",
+    out = "KRPC.AeroSim.json",
+    assemblies = [
+        ":KRPC.AeroSim",
+        "//service/SpaceCenter:KRPC.SpaceCenter",
+        "//server:KRPC",
+    ],
+    service = "AeroSim",
+    visibility = ["//visibility:public"],
+)
+
+test_suite(
+    name = "test",
+    tests = [":lint"],
+)
+
+test_suite(
+    name = "lint",
+    tests = [
+        ":pylint",
+    ],
+)
+
+py_lint_test(
+    name = "pylint",
+    size = "small",
+    srcs = glob(["test/*.py"]),
+    pylint_config = "test/pylint.rc",
+    deps = [
+        "//client/python:krpc_lib",
+        "//tools/krpctest:krpctest_lib",
+    ],
+)

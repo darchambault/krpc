@@ -120,6 +120,13 @@ clientgen_cnano(
 )
 
 clientgen_cnano(
+    name = "services-aerosim",
+    out = "include/krpc_cnano/services/aero_sim.h",
+    defs = "//service/AeroSim:ServiceDefinitions",
+    service = "AeroSim",
+)
+
+clientgen_cnano(
     name = "services-test-service",
     out = "test/services/test_service.h",
     defs = "//tools/TestServer:ServiceDefinitions",
@@ -138,6 +145,7 @@ hdrs = glob(["include/**/*.h"]) + [
     ":services-ui",
     ":services-lidar",
     ":services-dockingcamera",
+    ":services-aerosim",
 ]
 
 cc_library(

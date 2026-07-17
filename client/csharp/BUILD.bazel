@@ -68,6 +68,7 @@ srcs = glob(["src/**/*.cs"]) + [
     ":services-ui",
     ":services-lidar",
     ":services-dockingcamera",
+    ":services-aerosim",
 ]
 
 deps = [
@@ -189,6 +190,13 @@ clientgen_csharp(
     out = "Services/DockingCamera.cs",
     defs = "//service/DockingCamera:ServiceDefinitions",
     service = "DockingCamera",
+)
+
+clientgen_csharp(
+    name = "services-aerosim",
+    out = "Services/AeroSim.cs",
+    defs = "//service/AeroSim:ServiceDefinitions",
+    service = "AeroSim",
 )
 
 test_suite(

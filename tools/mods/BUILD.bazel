@@ -11,6 +11,11 @@
 #   InfernalRobotics  -> GameData/MagicSmokeIndustries
 #   KerbalAlarmClock  -> GameData/TriggerTech
 # tools/krpctest mirrors this registry on the Python side.
+#
+# TODO: add KSPAeroSim (-> GameData/KSPAeroSim) for the AeroSim service tests
+# once the mod has downloadable releases; until then install it manually (the
+# krpc-install reconcile step only removes the managed folders above, so a
+# manual install survives).
 
 filegroup(
     name = "remotetech",

@@ -120,6 +120,13 @@ clientgen_cpp(
 )
 
 clientgen_cpp(
+    name = "services-aerosim",
+    out = "include/krpc/services/aero_sim.hpp",
+    defs = "//service/AeroSim:ServiceDefinitions",
+    service = "AeroSim",
+)
+
+clientgen_cpp(
     name = "services-test-service",
     out = "test/services/test_service.hpp",
     defs = "//tools/TestServer:ServiceDefinitions",
@@ -138,6 +145,7 @@ hdrs = glob(["include/**/*.hpp"]) + [
     ":services-ui",
     ":services-lidar",
     ":services-dockingcamera",
+    ":services-aerosim",
 ]
 
 cc_library(

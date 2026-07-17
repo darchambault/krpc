@@ -68,6 +68,7 @@ changeloggen(
         "//service/RemoteTech:CHANGES.txt": "RemoteTech service",
         "//service/LiDAR:CHANGES.txt": "LiDAR service",
         "//service/DockingCamera:CHANGES.txt": "DockingCamera service",
+        "//service/AeroSim:CHANGES.txt": "AeroSim service",
         "//client/python:CHANGES.txt": "Python client",
         "//client/csharp:CHANGES.txt": "C# client",
         "//client/cpp:CHANGES.txt": "C++ client",
@@ -175,6 +176,7 @@ defs = [
     "//service/UI:ServiceDefinitions",
     "//service/LiDAR:ServiceDefinitions",
     "//service/DockingCamera:ServiceDefinitions",
+    "//service/AeroSim:ServiceDefinitions",
 ]
 
 docgen_multiple(
