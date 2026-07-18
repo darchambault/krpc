@@ -1,9 +1,10 @@
 """Tests for the AeroSim service.
 
 KSPAeroSim is not a managed test mod: install it manually by copying the
-mod's GameData contents into the KSP GameData folder. The test classes skip
-themselves when the game state does not match (mod installed or not), so the
-file passes in both states.
+mod's GameData contents into the KSP GameData folder, and pass
+--skip-gamedata-check to krpc-install so the GameData validation accepts the
+unmanaged mod. The test classes skip themselves when the game state does not
+match (mod installed or not), so the file passes in both states.
 """
 
 import math

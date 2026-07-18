@@ -6,16 +6,25 @@
 # the corresponding archive (declared in MODULE.bazel); krpctest.install then copies the
 # mod's GameData subtree from the external repo.
 #
-# The mod name accepted by `--mods` maps to the GameData folder it installs as follows:
+# The mod name accepted by `--mods` maps to the GameData folder(s) it installs as follows:
 #   RemoteTech        -> GameData/RemoteTech
 #   InfernalRobotics  -> GameData/MagicSmokeIndustries
 #   KerbalAlarmClock  -> GameData/TriggerTech
+#   RealChute         -> GameData/RealChute
+#                        + GameData/000_Harmony, GameData/000_ClickThroughBlocker,
+#                          GameData/001_ToolbarControl (deps)
+#   DMagic            -> GameData/DMagicScienceAnimate
+#   AGExt             -> GameData/Diazo
+#                        + GameData/000_Harmony, GameData/000_ClickThroughBlocker,
+#                          GameData/001_ToolbarControl (deps, shared with RealChute),
+#                          GameData/SpaceTuxLibrary (dep)
 # tools/krpctest mirrors this registry on the Python side.
 #
 # TODO: add KSPAeroSim (-> GameData/KSPAeroSim) for the AeroSim service tests
-# once the mod has downloadable releases; until then install it manually (the
-# krpc-install reconcile step only removes the managed folders above, so a
-# manual install survives).
+# once the mod has downloadable releases; until then install it manually and
+# pass --skip-gamedata-check to krpc-install (the reconcile step leaves the
+# manual install alone, but the GameData validation only accepts the managed
+# set).
 
 filegroup(
     name = "remotetech",
@@ -32,5 +41,56 @@ filegroup(
 filegroup(
     name = "kerbal_alarm_clock",
     srcs = ["@kerbal_alarm_clock//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "realchute",
+    srcs = ["@realchute//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+# Runtime dependencies shared by RealChute and AGExt. Installed only alongside a mod that needs
+# them (their plugins will not load without ClickThroughBlocker + ToolbarControl, and
+# ClickThroughBlocker references Harmony), never requested on their own.
+filegroup(
+    name = "harmony",
+    srcs = ["@harmony//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "clickthroughblocker",
+    srcs = ["@clickthroughblocker//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "toolbarcontrol",
+    srcs = ["@toolbarcontrol//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+# DMagic's DMModuleScienceAnimateGeneric part module. Adds no parts of its own; a test-only part
+# config (tools/mods/config/DMagicScienceAnimate) supplies a part that uses it. No dependencies.
+filegroup(
+    name = "dmagic_science_animate",
+    srcs = ["@dmagic_science_animate//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+# Action Groups Extended. Adds no parts; a ModuleManager patch adds a ModuleAGX module to every
+# part instead. Shares RealChute's ClickThroughBlocker/ToolbarControl/Harmony dependencies, plus
+# SpaceTuxLibrary (KSP_Log).
+filegroup(
+    name = "agext",
+    srcs = ["@agext//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+# AGExt's SpaceTuxLibrary dependency (KSP_Log and other shared LGG libraries).
+filegroup(
+    name = "spacetuxlibrary",
+    srcs = ["@spacetuxlibrary//:gamedata"],
     visibility = ["//visibility:public"],
 )

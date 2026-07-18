@@ -1,8 +1,9 @@
 """Tests for AeroSim 6-DOF reentry prediction sessions.
 
 KSPAeroSim is not a managed test mod: install it manually by copying the
-mod's GameData contents into the KSP GameData folder. The tests skip
-themselves when the mod is not installed.
+mod's GameData contents into the KSP GameData folder, and pass
+--skip-gamedata-check to krpc-install so the GameData validation accepts the
+unmanaged mod. The tests skip themselves when the mod is not installed.
 """
 
 import math
