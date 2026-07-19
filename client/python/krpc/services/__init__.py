@@ -6,6 +6,7 @@ try:
     from krpc.services.ui import UI
     from krpc.services.infernalrobotics import InfernalRobotics
     from krpc.services.kerbalalarmclock import KerbalAlarmClock
+    from krpc.services.mechjeb import MechJeb
     from krpc.services.remotetech import RemoteTech
     from krpc.services.lidar import LiDAR
     from krpc.services.dockingcamera import DockingCamera
@@ -17,6 +18,7 @@ except ImportError as exn:
     UI = lambda _: None
     InfernalRobotics = lambda _: None
     KerbalAlarmClock = lambda _: None
+    MechJeb = lambda _: None
     RemoteTech = lambda _: None
     LiDAR = lambda _: None
     DockingCamera = lambda _: None
@@ -31,6 +33,7 @@ class Client:
         self.ui = UI(self)
         self.infernal_robotics = InfernalRobotics(self)
         self.kerbal_alarm_clock = KerbalAlarmClock(self)
+        self.mech_jeb = MechJeb(self)
         self.remote_tech = RemoteTech(self)
         self.lidar = LiDAR(self)
         self.docking_camera = DockingCamera(self)
@@ -43,6 +46,7 @@ class Client:
             "UI": self.ui,
             "InfernalRobotics": self.infernal_robotics,
             "KerbalAlarmClock": self.kerbal_alarm_clock,
+            "MechJeb": self.mech_jeb,
             "RemoteTech": self.remote_tech,
             "LiDAR": self.lidar,
             "DockingCamera": self.docking_camera,

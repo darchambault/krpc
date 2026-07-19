@@ -4,10 +4,10 @@ Builds the ``//:krpc`` release archive with Bazel and extracts its ``GameData`` 
 into the KSP install (from ``KSP_DIR`` or ``--ksp-dir``) - exactly as a user
 installs a release - then adds the test-only bits the public release omits (the
 ``TestingTools`` add-on and the test ``settings.cfg``). The optional set of managed
-third-party mods (RemoteTech, InfernalRobotics, KerbalAlarmClock) used by some service
-tests is reconciled so GameData contains exactly the requested set. Finally GameData is
-validated against the known-valid set, so an unexpected mod left over from an earlier
-session is reported up front instead of silently stopping the server from starting; a dev
+third-party mods (RemoteTech, InfernalRobotics, KerbalAlarmClock, MechJeb) used by
+some service tests is reconciled so GameData contains exactly the requested set. Finally
+GameData is validated against the known-valid set, so an unexpected mod left over from an
+earlier session is reported up front instead of silently stopping the server from starting; a dev
 deliberately running an unmanaged mod can opt out with ``--skip-gamedata-check``.
 
 Run it from the repository root, either as the ``krpc-install`` console script or with
@@ -27,31 +27,51 @@ from krpctest.env import get_ksp_dir, get_repo_root
 from krpctest.version import __version__
 
 # Managed third-party mods: name accepted by --mods -> list of components it installs, each a
-# (Bazel target under //tools/mods, GameData subdir it installs as) pair. Most mods are a
+# (Bazel target under //tools/mods, source path in its archive, GameData destination) tuple.
+# Most mods are a
 # single component; RealChute and AGExt also pull in the shared ClickThroughBlocker /
 # ToolbarControl / Harmony dependencies, whose assemblies their plugins hard-depend on.
 MODS = {
-    "RemoteTech": [("remotetech", "RemoteTech")],
-    "InfernalRobotics": [("infernal_robotics", "MagicSmokeIndustries")],
-    "KerbalAlarmClock": [("kerbal_alarm_clock", "TriggerTech")],
-    "RealChute": [
-        ("realchute", "RealChute"),
-        ("harmony", "000_Harmony"),
-        ("clickthroughblocker", "000_ClickThroughBlocker"),
-        ("toolbarcontrol", "001_ToolbarControl"),
+    "RemoteTech": [("remotetech", "GameData/RemoteTech", "RemoteTech")],
+    "InfernalRobotics": [
+        ("infernal_robotics", "GameData/MagicSmokeIndustries", "MagicSmokeIndustries")
     ],
-    "DMagic": [("dmagic_science_animate", "DMagicScienceAnimate")],
+    "KerbalAlarmClock": [("kerbal_alarm_clock", "GameData/TriggerTech", "TriggerTech")],
+    "MechJeb": [("mechjeb", "MechJeb2", "MechJeb2")],
+    "RealChute": [
+        ("realchute", "GameData/RealChute", "RealChute"),
+        ("harmony", "GameData/000_Harmony", "000_Harmony"),
+        (
+            "clickthroughblocker",
+            "GameData/000_ClickThroughBlocker",
+            "000_ClickThroughBlocker",
+        ),
+        ("toolbarcontrol", "GameData/001_ToolbarControl", "001_ToolbarControl"),
+    ],
+    "DMagic": [
+        (
+            "dmagic_science_animate",
+            "GameData/DMagicScienceAnimate",
+            "DMagicScienceAnimate",
+        )
+    ],
     "AGExt": [
-        ("agext", "Diazo"),
-        ("harmony", "000_Harmony"),
-        ("clickthroughblocker", "000_ClickThroughBlocker"),
-        ("toolbarcontrol", "001_ToolbarControl"),
-        ("spacetuxlibrary", "SpaceTuxLibrary"),
+        ("agext", "GameData/Diazo", "Diazo"),
+        ("harmony", "GameData/000_Harmony", "000_Harmony"),
+        (
+            "clickthroughblocker",
+            "GameData/000_ClickThroughBlocker",
+            "000_ClickThroughBlocker",
+        ),
+        ("toolbarcontrol", "GameData/001_ToolbarControl", "001_ToolbarControl"),
+        ("spacetuxlibrary", "GameData/SpaceTuxLibrary", "SpaceTuxLibrary"),
     ],
 }
 
 # All managed GameData subdirs, every one a candidate for removal during reconcile.
-_ALL_MOD_SUBDIRS = [subdir for comps in MODS.values() for _, subdir in comps]
+_ALL_MOD_SUBDIRS = [
+    destination for comps in MODS.values() for _, _, destination in comps
+]
 
 # GameData entries a valid test install always permits, on top of the managed-mod subdirs
 # and whatever mods a test requests. Stock KSP ships Squad and SquadExpansion; install()
@@ -78,16 +98,15 @@ def _is_module_manager_dll(entry):
 
 def _requested_mod_subdirs(mods):
     """GameData subdir names the given managed mods install (including dependencies)."""
-    return {subdir for mod in mods for _, subdir in MODS[mod]}
+    return {destination for mod in mods for _, _, destination in MODS[mod]}
 
 
-def _mod_archive_src(target, subdir):
+def _mod_archive_src(target, source):
     return os.path.join(
         "bazel-krpc",
         "external",
         "+http_archive+" + target,
-        "GameData",
-        subdir,
+        *source.split("/"),
     )
 
 
@@ -218,19 +237,19 @@ def _reconcile_mods(mods, root, gamedata_root):
     requested_subdirs = _requested_mod_subdirs(mods)
 
     # Remove any managed mod that is not requested.
-    for subdir in _ALL_MOD_SUBDIRS:
-        if subdir not in requested_subdirs:
-            shutil.rmtree(os.path.join(gamedata_root, subdir), ignore_errors=True)
+    for destination in _ALL_MOD_SUBDIRS:
+        if destination not in requested_subdirs:
+            shutil.rmtree(os.path.join(gamedata_root, destination), ignore_errors=True)
 
     # Install (or refresh) each requested mod (and its dependencies) from its Bazel-fetched
     # archive, then lay any bundled config overlay on top (see _mod_config_overlay).
-    for target, subdir in requested:
+    for target, source, destination in requested:
         subprocess.check_call(["bazel", "build", "//tools/mods:" + target], cwd=root)
-        dst = os.path.join(gamedata_root, subdir)
+        dst = os.path.join(gamedata_root, destination)
         if os.path.exists(dst):
             shutil.rmtree(dst)
-        shutil.copytree(os.path.join(root, _mod_archive_src(target, subdir)), dst)
-        overlay = _mod_config_overlay(root, subdir)
+        shutil.copytree(os.path.join(root, _mod_archive_src(target, source)), dst)
+        overlay = _mod_config_overlay(root, destination)
         if os.path.isdir(overlay):
             shutil.copytree(overlay, dst, dirs_exist_ok=True)
         _normalize_permissions(dst)

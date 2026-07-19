@@ -1,0 +1,54 @@
+.. default-domain:: {{ domain.sphinxname }}
+.. highlight:: {{ domain.highlight }}
+
+MechJeb API
+===========
+
+Provides RPCs for interacting with `MechJeb 2`_. MechJeb is an optional dependency and
+must be installed separately; use ``MechJeb.Available`` to detect it before accessing
+the flight-only API.
+
+All autopilot, window, controller and operation objects are permanent for the lifetime
+of KSP, so clients can cache and reuse them across flights and vessel changes. Check
+``MechJeb.APIReady`` after entering flight or changing vessels before using those
+objects.
+
+This service was originally developed by `Genhis`_ and was integrated from
+KRPC.MechJeb v0.8.1. Many member descriptions are based on the `MechJeb 2 wiki`_.
+
+.. toctree::
+   mech-jeb/mechjeb
+
+Autopilots
+----------
+
+.. toctree::
+   mech-jeb/airplane-autopilot
+   mech-jeb/ascent-autopilot
+   mech-jeb/docking-autopilot
+   mech-jeb/landing-autopilot
+   mech-jeb/rendezvous-autopilot
+
+Windows
+-------
+
+.. toctree::
+   mech-jeb/maneuver-planner
+   mech-jeb/smart-ass
+   mech-jeb/smart-rcs
+   mech-jeb/translatron
+
+Controllers
+-----------
+
+.. toctree::
+   mech-jeb/deployable-controller
+   mech-jeb/node-executor
+   mech-jeb/rcs-controller
+   mech-jeb/staging-controller
+   mech-jeb/target-controller
+   mech-jeb/thrust-controller
+
+.. _MechJeb 2: https://github.com/MuMech/MechJeb2
+.. _Genhis: https://github.com/Genhis/KRPC.MechJeb
+.. _MechJeb 2 wiki: https://github.com/MuMech/MechJeb2/wiki/

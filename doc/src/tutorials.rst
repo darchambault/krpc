@@ -15,3 +15,17 @@ of kRPC.
    tutorials/docking-guidance
    tutorials/user-interface
    tutorials/autopilot
+
+MechJeb Tutorials
+-----------------
+
+These tutorials require `MechJeb 2 <https://github.com/MuMech/MechJeb2>`_ to be
+installed separately.
+
+.. toctree::
+   :maxdepth: 1
+
+   tutorials/mechjeb-launch-into-orbit
+   tutorials/mechjeb-advanced-launch
+   tutorials/mechjeb-rendezvous
+   tutorials/mechjeb-docking

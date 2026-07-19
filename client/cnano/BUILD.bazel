@@ -28,6 +28,7 @@ pkg_zip(
         ":services-kerbalalarmclock",
         ":services-krpc",
         ":services-lidar",
+        ":services-mechjeb",
         ":services-remotetech",
         ":services-spacecenter",
         ":services-ui",
@@ -92,6 +93,13 @@ clientgen_cnano(
 )
 
 clientgen_cnano(
+    name = "services-mechjeb",
+    out = "include/krpc_cnano/services/mech_jeb.h",
+    defs = "//service/MechJeb:ServiceDefinitions",
+    service = "MechJeb",
+)
+
+clientgen_cnano(
     name = "services-remotetech",
     out = "include/krpc_cnano/services/remote_tech.h",
     defs = "//service/RemoteTech:ServiceDefinitions",
@@ -134,6 +142,7 @@ hdrs = glob(["include/**/*.h"]) + [
     ":services-drawing",
     ":services-infernalrobotics",
     ":services-kerbalalarmclock",
+    ":services-mechjeb",
     ":services-remotetech",
     ":services-ui",
     ":services-lidar",

@@ -64,6 +64,7 @@ srcs = glob(["src/**/*.cs"]) + [
     ":services-drawing",
     ":services-infernalrobotics",
     ":services-kerbalalarmclock",
+    ":services-mechjeb",
     ":services-remotetech",
     ":services-ui",
     ":services-lidar",
@@ -158,6 +159,16 @@ clientgen_csharp(
     out = "Services/KerbalAlarmClock.cs",
     defs = "//service/KerbalAlarmClock:ServiceDefinitions",
     service = "KerbalAlarmClock",
+    visibility = [
+        "//:__pkg__",
+    ],
+)
+
+clientgen_csharp(
+    name = "services-mechjeb",
+    out = "Services/MechJeb.cs",
+    defs = "//service/MechJeb:ServiceDefinitions",
+    service = "MechJeb",
     visibility = [
         "//:__pkg__",
     ],

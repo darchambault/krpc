@@ -11,6 +11,7 @@ C++
    cpp/api/ui
    cpp/api/infernal-robotics
    cpp/api/kerbal-alarm-clock
+   cpp/api/mech-jeb
    cpp/api/remote-tech
    cpp/api/lidar
    cpp/api/docking-camera

@@ -17,6 +17,7 @@ py_library(
         ":services-kerbalalarmclock",
         ":services-krpc",
         ":services-lidar",
+        ":services-mechjeb",
         ":services-remotetech",
         ":services-spacecenter",
         ":services-testservice",
@@ -107,6 +108,7 @@ py_sdist(
         ":services-kerbalalarmclock",
         ":services-krpc",
         ":services-lidar",
+        ":services-mechjeb",
         ":services-remotetech",
         ":services-spacecenter",
         ":services-testservice",
@@ -165,6 +167,13 @@ clientgen_python(
     out = "krpc/services/kerbalalarmclock.py",
     defs = "//service/KerbalAlarmClock:ServiceDefinitions",
     service = "KerbalAlarmClock",
+)
+
+clientgen_python(
+    name = "services-mechjeb",
+    out = "krpc/services/mechjeb.py",
+    defs = "//service/MechJeb:ServiceDefinitions",
+    service = "MechJeb",
 )
 
 clientgen_python(

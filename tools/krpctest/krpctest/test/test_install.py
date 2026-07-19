@@ -1,8 +1,17 @@
 import os
 import shutil
 import tempfile
+from unittest import mock
+
 import krpctest
-from krpctest.install import _validate_gamedata
+from krpctest.install import (
+    MODS,
+    _ALL_MOD_SUBDIRS,
+    _mod_archive_src,
+    _reconcile_mods,
+    _requested_mod_subdirs,
+    _validate_gamedata,
+)
 
 # A clean no-mod GameData: the stock game, kRPC, the ModuleManager assembly and its
 # runtime-generated cache files.
@@ -63,3 +72,50 @@ class TestValidateGamedata(krpctest.TestCase):
         with self.assertRaises(RuntimeError) as cm:
             _validate_gamedata(self.gamedata, set())
         self.assertIn("RealChute", str(cm.exception))
+
+    def test_root_level_mod_archive_path(self):
+        self.assertEqual(
+            os.path.join("bazel-krpc", "external", "+http_archive+mechjeb", "MechJeb2"),
+            _mod_archive_src("mechjeb", "MechJeb2"),
+        )
+
+    def test_mechjeb_destination(self):
+        self.assertEqual({"MechJeb2"}, _requested_mod_subdirs(["MechJeb"]))
+
+    def test_existing_mod_archive_paths_unchanged(self):
+        for mod, components in MODS.items():
+            if mod == "MechJeb":
+                continue
+            for _, source, destination in components:
+                self.assertEqual("GameData/" + destination, source)
+
+    def test_reconcile_removes_every_unrequested_mod(self):
+        for destination in _ALL_MOD_SUBDIRS:
+            os.makedirs(os.path.join(self.gamedata, destination), exist_ok=True)
+
+        _reconcile_mods([], self.gamedata, self.gamedata)
+
+        for destination in _ALL_MOD_SUBDIRS:
+            self.assertFalse(os.path.exists(os.path.join(self.gamedata, destination)))
+
+    def test_reconcile_installs_mechjeb_from_archive_root(self):
+        archive = os.path.join(
+            self.gamedata,
+            _mod_archive_src("mechjeb", "MechJeb2"),
+        )
+        os.makedirs(archive)
+        with open(os.path.join(archive, "MechJeb2.dll"), "w", encoding="utf-8"):
+            pass
+        gamedata = os.path.join(self.gamedata, "ksp", "GameData")
+        os.makedirs(gamedata)
+
+        with mock.patch("krpctest.install.subprocess.check_call") as build:
+            _reconcile_mods(["MechJeb"], self.gamedata, gamedata)
+
+        build.assert_called_once_with(
+            ["bazel", "build", "//tools/mods:mechjeb"],
+            cwd=self.gamedata,
+        )
+        self.assertTrue(
+            os.path.isfile(os.path.join(gamedata, "MechJeb2", "MechJeb2.dll"))
+        )

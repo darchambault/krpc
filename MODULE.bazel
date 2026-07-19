@@ -442,7 +442,7 @@ http_file(
 )
 
 # ----------------------- Third-party mods (integration testing) -------------------------
-# The RemoteTech, InfernalRobotics and KerbalAlarmClock services wrap these mods, and the
+# The RemoteTech, InfernalRobotics, KerbalAlarmClock and MechJeb services wrap these mods, and the
 # SpaceCenter Parachute class wraps RealChute. They are installed into GameData by
 # `krpc-install --mods=...` for the integration tests, and are not part of the release. Each
 # filegroup exports only the mod's own GameData subtree (the RemoteTech archive also bundles
@@ -467,6 +467,13 @@ http_archive(
     build_file_content = "filegroup(name = 'gamedata', srcs = glob(['GameData/TriggerTech/**']), visibility = ['//visibility:public'])",
     sha256 = "5fbaf7a1c69dec68557f4ce956e0f85956e66ffd828545914f23b79024fc3d67",
     url = "https://github.com/TriggerAu/KerbalAlarmClock/releases/download/v3.14.0.0/KerbalAlarmClock_3.14.0.0.zip",
+)
+
+http_archive(
+    name = "mechjeb",
+    build_file_content = "filegroup(name = 'gamedata', srcs = glob(['MechJeb2/**']), visibility = ['//visibility:public'])",
+    sha256 = "3bd39e02c41a8e405eb980764aa14635af1ed50521119fe85c8a054d8cffc926",
+    url = "https://ksp.sarbian.com/jenkins/job/MechJeb2-Release/45/artifact/MechJeb2-2.15.1.0.zip",
 )
 
 http_archive(

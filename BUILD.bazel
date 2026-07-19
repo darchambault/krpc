@@ -21,6 +21,9 @@ license_text = """This license (LGPL v3) applies to all parts of kRPC except for
   - GameData/kRPC/KRPC.SpaceCenter.* is under the GPLv3 license.
     See LICENSE.KRPC.SpaceCenter
 
+  - GameData/kRPC/KRPC.MechJeb.* is under the GPLv3 license.
+    See LICENSE.KRPC.MechJeb
+
   - GameData/kRPC/Google.Protobuf.dll is a binary from Google's protobuf project.
     See LICENSE.Google.Protobuf
 
@@ -118,6 +121,7 @@ pkg_zip(
         "//service/Drawing",
         "//service/InfernalRobotics",
         "//service/KerbalAlarmClock",
+        "//service/MechJeb",
         "//service/RemoteTech",
         "//service/UI",
         "//service/LiDAR",
@@ -154,6 +158,10 @@ pkg_zip(
         "service/KerbalAlarmClock/KRPC.KerbalAlarmClock/net472/": "GameData/kRPC/",
         "service/KerbalAlarmClock/": "GameData/kRPC/",
         "service/KerbalAlarmClock/CHANGES.txt": "GameData/kRPC/CHANGES.KerbalAlarmClock.txt",
+        "service/MechJeb/KRPC.MechJeb/net472/": "GameData/kRPC/",
+        "service/MechJeb/": "GameData/kRPC/",
+        "service/MechJeb/CHANGES.txt": "GameData/kRPC/CHANGES.MechJeb.txt",
+        "service/MechJeb/LICENSE": "LICENSE.KRPC.MechJeb",
         "service/RemoteTech/KRPC.RemoteTech/net472/": "GameData/kRPC/",
         "service/RemoteTech/": "GameData/kRPC/",
         "service/RemoteTech/CHANGES.txt": "GameData/kRPC/CHANGES.RemoteTech.txt",
@@ -188,6 +196,7 @@ test_suite(
         "//doc:test",
         "//service/Drawing:test",
         "//service/InfernalRobotics:test",
+        "//service/MechJeb:test",
         "//service/RemoteTech:test",
         "//service/SpaceCenter:test",
         "//service/UI:test",
@@ -221,6 +230,7 @@ test_suite(
         "//doc:lint",
         "//service/Drawing:lint",
         "//service/InfernalRobotics:lint",
+        "//service/MechJeb:lint",
         "//service/RemoteTech:lint",
         "//service/SpaceCenter:lint",
         "//service/UI:lint",
@@ -243,6 +253,7 @@ filegroup(
         "//service/InfernalRobotics",
         "//service/KerbalAlarmClock",
         "//service/LiDAR",
+        "//service/MechJeb",
         "//service/RemoteTech",
         "//service/SpaceCenter",
         "//service/UI",

@@ -11,6 +11,7 @@ Java
    java/api/ui
    java/api/infernal-robotics
    java/api/kerbal-alarm-clock
+   java/api/mech-jeb
    java/api/remote-tech
    java/api/lidar
    java/api/docking-camera

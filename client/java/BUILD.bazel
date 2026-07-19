@@ -37,6 +37,7 @@ java_library(
         ":services-kerbalalarmclock",
         ":services-krpc",
         ":services-lidar",
+        ":services-mechjeb",
         ":services-remotetech",
         ":services-spacecenter",
         ":services-ui",
@@ -143,6 +144,13 @@ clientgen_java(
     out = "services/KerbalAlarmClock.java",
     defs = "//service/KerbalAlarmClock:ServiceDefinitions",
     service = "KerbalAlarmClock",
+)
+
+clientgen_java(
+    name = "services-mechjeb",
+    out = "services/MechJeb.java",
+    defs = "//service/MechJeb:ServiceDefinitions",
+    service = "MechJeb",
 )
 
 clientgen_java(

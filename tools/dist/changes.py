@@ -25,6 +25,7 @@ def main():
         ('Drawing service', get_changes('service/Drawing/CHANGES.txt')),
         ('InfernalRobotics service', get_changes('service/InfernalRobotics/CHANGES.txt')),
         ('KerbalAlarmClock service', get_changes('service/KerbalAlarmClock/CHANGES.txt')),
+        ('MechJeb service', get_changes('service/MechJeb/CHANGES.txt')),
         ('RemoteTech service', get_changes('service/RemoteTech/CHANGES.txt')),
         ('UI service', get_changes('service/UI/CHANGES.txt')),
         ('C# client', get_changes('client/csharp/CHANGES.txt')),

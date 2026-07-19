@@ -396,6 +396,7 @@ class TestClient(ServerTestCase, unittest.TestCase):
                     "kerbal_alarm_clock",
                     "lidar",
                     "infernal_robotics",
+                    "mech_jeb",
                     "remote_tech",
                     "space_center",
                     "docking_camera",

@@ -11,6 +11,7 @@ Python
    python/api/ui
    python/api/infernal-robotics
    python/api/kerbal-alarm-clock
+   python/api/mech-jeb
    python/api/remote-tech
    python/api/lidar
    python/api/docking-camera

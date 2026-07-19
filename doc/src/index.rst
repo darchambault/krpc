@@ -32,8 +32,8 @@ It also supports websockets and serialio (for example on Arduino).
    changelog
 
 The mod exposes most of KSPs API for controlling and interacting with rockets,
-and also includes support several popular mods including Ferram Aerospace
-Research, Kerbal Alarm Clock and Infernal Robotics.
+and also includes support for several popular mods including Ferram Aerospace
+Research, Infernal Robotics, Kerbal Alarm Clock and MechJeb 2.
 
 This functionality is provided to client programs via a server running in the
 game. Client scripts connect to this server and use it to execute 'remote

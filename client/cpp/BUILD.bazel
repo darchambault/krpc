@@ -29,6 +29,7 @@ pkg_zip(
         ":services-kerbalalarmclock",
         ":services-krpc",
         ":services-lidar",
+        ":services-mechjeb",
         ":services-remotetech",
         ":services-spacecenter",
         ":services-ui",
@@ -92,6 +93,13 @@ clientgen_cpp(
 )
 
 clientgen_cpp(
+    name = "services-mechjeb",
+    out = "include/krpc/services/mech_jeb.hpp",
+    defs = "//service/MechJeb:ServiceDefinitions",
+    service = "MechJeb",
+)
+
+clientgen_cpp(
     name = "services-remotetech",
     out = "include/krpc/services/remote_tech.hpp",
     defs = "//service/RemoteTech:ServiceDefinitions",
@@ -134,6 +142,7 @@ hdrs = glob(["include/**/*.hpp"]) + [
     ":services-drawing",
     ":services-infernalrobotics",
     ":services-kerbalalarmclock",
+    ":services-mechjeb",
     ":services-remotetech",
     ":services-ui",
     ":services-lidar",

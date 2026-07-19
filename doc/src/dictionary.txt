@@ -1,4 +1,5 @@
 Aeris
+AoA
 Arduino
 Autotools
 Bazel
@@ -8,7 +9,9 @@ Cnano
 Config
 Ferram
 GameData
+Genhis
 Goliath
+Hohmann
 IDisposable
 Javascript
 Jeb
@@ -19,13 +22,17 @@ Konstructs
 Kosmo
 Landers
 LaunchPad
+MechJeb
 MoI
 ModuleEngines
 MyGroup
 NUnit
 Olex
 PID
+SmartASS
+SmartRCS
 Tron
+Translatron
 Wheesley
 accelerometers
 adaptively

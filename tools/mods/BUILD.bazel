@@ -2,7 +2,7 @@
 #
 # These are NOT part of the kRPC release. `krpc-install --mods=...` installs a
 # requested subset into the KSP GameData directory so the RemoteTech / InfernalRobotics /
-# KerbalAlarmClock service tests can exercise the real mods. Building a target here fetches
+# KerbalAlarmClock / MechJeb service tests can exercise the real mods. Building a target here fetches
 # the corresponding archive (declared in MODULE.bazel); krpctest.install then copies the
 # mod's GameData subtree from the external repo.
 #
@@ -10,6 +10,7 @@
 #   RemoteTech        -> GameData/RemoteTech
 #   InfernalRobotics  -> GameData/MagicSmokeIndustries
 #   KerbalAlarmClock  -> GameData/TriggerTech
+#   MechJeb           -> GameData/MechJeb2
 #   RealChute         -> GameData/RealChute
 #                        + GameData/000_Harmony, GameData/000_ClickThroughBlocker,
 #                          GameData/001_ToolbarControl (deps)
@@ -35,6 +36,12 @@ filegroup(
 filegroup(
     name = "kerbal_alarm_clock",
     srcs = ["@kerbal_alarm_clock//:gamedata"],
+    visibility = ["//visibility:public"],
+)
+
+filegroup(
+    name = "mechjeb",
+    srcs = ["@mechjeb//:gamedata"],
     visibility = ["//visibility:public"],
 )
 

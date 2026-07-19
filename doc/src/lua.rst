@@ -11,6 +11,7 @@ Lua
    lua/api/ui
    lua/api/infernal-robotics
    lua/api/kerbal-alarm-clock
+   lua/api/mech-jeb
    lua/api/remote-tech
    lua/api/lidar
    lua/api/docking-camera

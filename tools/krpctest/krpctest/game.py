@@ -38,6 +38,7 @@ _MOD_SERVICES = {
     "RemoteTech": "remote_tech",
     "InfernalRobotics": "infernal_robotics",
     "KerbalAlarmClock": "kerbal_alarm_clock",
+    "MechJeb": "mech_jeb",
 }
 
 # Some mods add parts but no dedicated service (RealChute is wrapped by the SpaceCenter
