@@ -33,6 +33,7 @@
     </Compile>
     <Compile Include="Addon.cs" />
     <Compile Include="ConfigurationFile.cs" />
+    <Compile Include="MechJebInstallationChecker.cs" />
     <Compile Include="Properties\AssemblyKSPVersion.cs" />
     <Compile Include="ServicesChecker.cs" />
     <Compile Include="UI\ClientConnectingDialog.cs" />

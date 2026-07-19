@@ -1,3 +1,4 @@
 v0.6.0
  * Integrate the KRPC.MechJeb v0.8.1 service into kRPC, with support for MechJeb 2.15.x
  * Add MechJeb.Available to report whether MechJeb 2 is installed
+ * Warn on the main menu if KSP loads the legacy standalone add-on or finds multiple copies

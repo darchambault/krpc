@@ -47,6 +47,7 @@
     <Compile Include="EditableVariables.cs" />
     <Compile Include="ExtensionMethods\ReflectionExtensions.cs" />
     <Compile Include="ExtensionMethods\VesselExtensions.cs" />
+    <Compile Include="IntegratedServiceMarker.cs" />
     <Compile Include="KSPAddon.cs" />
     <Compile Include="LandingAutopilot.cs" />
     <Compile Include="Maneuver\Operation.cs" />
